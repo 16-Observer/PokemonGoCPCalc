@@ -1,7 +1,7 @@
 /**
  * app.js — UI controller for the CP/IV Calculator
  */
-import { calcCP, calcHP, ivPct, reverseCalc, LEVELS } from './calc.js';
+import { calcCP, calcHP, ivPct, reverseCalc, leagueRanker, LEVELS } from './calc.js';
 
 // ---------------------------------------------------------------------------
 // State
@@ -232,12 +232,16 @@ function runReverse() {
       appraisal: appraisalValue,
     });
 
-    renderReverseResults(results, targetCP);
+    // Compute GL/UL rankers (iterate all 4096 IV combos each — fast)
+    const rankGL = leagueRanker(atk, def, sta, 1500);
+    const rankUL = leagueRanker(atk, def, sta, 2500);
+
+    renderReverseResults(results, targetCP, rankGL, rankUL);
     updateURL();
   }, 10);
 }
 
-function renderReverseResults(results, targetCP) {
+function renderReverseResults(results, targetCP, rankGL, rankUL) {
   const el = document.getElementById('results');
   const name = selectedSpecies.name;
 
@@ -250,16 +254,40 @@ function renderReverseResults(results, targetCP) {
     return;
   }
 
+  // Summary stats
+  const hasHundo = results.some(r => r.a === 15 && r.d === 15 && r.s === 15);
+  const GL_THRESHOLD = 98, UL_THRESHOLD = 98;
+  const glCount  = results.filter(r => rankGL(r.a, r.d, r.s) >= GL_THRESHOLD).length;
+  const ulCount  = results.filter(r => rankUL(r.a, r.d, r.s) >= UL_THRESHOLD).length;
+
+  const badges = [];
+  if (hasHundo) badges.push('<span class="badge badge-hundo">✦ Hundo possible</span>');
+  if (glCount)  badges.push(`<span class="badge badge-gl">GL ×${glCount}</span>`);
+  if (ulCount)  badges.push(`<span class="badge badge-ul">UL ×${ulCount}</span>`);
+
   const displayed = results.slice(0, 200);
   const more = results.length - displayed.length;
 
   const rows = displayed.map(({ level, a, d, s, pct }) => {
-    const cls = pct === 100 ? ' class="perfect"' : pct >= 93.4 ? ' class="great"' : '';
-    return `<tr${cls}>
-      <td>${level % 1 === 0 ? level.toFixed(0) : level.toFixed(1)}</td>
+    const gl = rankGL(a, d, s);
+    const ul = rankUL(a, d, s);
+    const pvpBadges = [
+      gl >= GL_THRESHOLD ? '<span class="pvp-badge pvp-gl">GL</span>' : '',
+      ul >= UL_THRESHOLD ? '<span class="pvp-badge pvp-ul">UL</span>' : '',
+    ].join('');
+
+    let rowClass = '';
+    if (pct === 100)      rowClass = 'row-hundo';
+    else if (pct >= 93.4) rowClass = 'row-great';
+    else if (pct >= 82.2) rowClass = 'row-good';
+
+    const lvStr = level % 1 === 0 ? level.toFixed(0) : level.toFixed(1);
+    return `<tr class="${rowClass}">
+      <td>${lvStr}</td>
       <td>${a}</td><td>${d}</td><td>${s}</td>
-      <td>${pct.toFixed(1)}%</td>
+      <td class="iv-pct">${pct.toFixed(1)}%</td>
       <td>${a + d + s}</td>
+      <td class="pvp-cell">${pvpBadges}</td>
     </tr>`;
   }).join('');
 
@@ -268,10 +296,11 @@ function renderReverseResults(results, targetCP) {
       <span class="results-title">${name} — CP ${targetCP}</span>
       <span class="results-count">${results.length} match${results.length !== 1 ? 'es' : ''}</span>
     </div>
+    ${badges.length ? `<div class="summary-badges">${badges.join('')}</div>` : ''}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Lv</th><th>Atk</th><th>Def</th><th>Sta</th><th>IV%</th><th>Sum</th>
+          <th>Lv</th><th>Atk</th><th>Def</th><th>Sta</th><th>IV%</th><th>Sum</th><th>PvP</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>

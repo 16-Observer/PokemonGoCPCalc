@@ -151,6 +151,53 @@ export function reverseCalc(baseAtk, baseDef, baseSta, targetCP, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// PvP league utilities
+// ---------------------------------------------------------------------------
+
+/** Highest level where CP ≤ cap, or null if even lv1 exceeds cap. */
+export function bestLevelForCap(baseAtk, baseDef, baseSta, atkIV, defIV, staIV, cap) {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (calcCP(baseAtk, baseDef, baseSta, atkIV, defIV, staIV, LEVELS[i]) <= cap) {
+      return LEVELS[i];
+    }
+  }
+  return null;
+}
+
+/** Effective stat product at a given level (used for PvP ranking). */
+export function statProduct(baseAtk, baseDef, baseSta, atkIV, defIV, staIV, level) {
+  const cpm = CPM.get(level);
+  return (baseAtk + atkIV) * cpm
+       * (baseDef + defIV) * cpm
+       * Math.max(10, Math.floor((baseSta + staIV) * cpm));
+}
+
+/**
+ * Compute the maximum achievable stat product for a species in a league,
+ * and return a rank function that scores any IV set as % of that max.
+ * Iterates all 4096 IV combos — fast enough to run per search.
+ */
+export function leagueRanker(baseAtk, baseDef, baseSta, cap) {
+  let maxSP = 0;
+  for (let a = 0; a <= 15; a++) {
+    for (let d = 0; d <= 15; d++) {
+      for (let s = 0; s <= 15; s++) {
+        const lv = bestLevelForCap(baseAtk, baseDef, baseSta, a, d, s, cap);
+        if (lv === null) continue;
+        const sp = statProduct(baseAtk, baseDef, baseSta, a, d, s, lv);
+        if (sp > maxSP) maxSP = sp;
+      }
+    }
+  }
+  if (maxSP === 0) return () => 0;
+  return (a, d, s) => {
+    const lv = bestLevelForCap(baseAtk, baseDef, baseSta, a, d, s, cap);
+    if (lv === null) return 0;
+    return statProduct(baseAtk, baseDef, baseSta, a, d, s, lv) / maxSP * 100;
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Quick self-test (run with: node calc.js)
 // ---------------------------------------------------------------------------
 if (typeof process !== 'undefined' && process.argv[1]?.endsWith('calc.js')) {
