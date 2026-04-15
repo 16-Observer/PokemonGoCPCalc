@@ -385,11 +385,81 @@ td {
 }
 td:first-child { text-align: left; font-weight: 600; }
 
-tr.perfect { background: rgba(30, 142, 62, .08); }
-tr.perfect td:nth-child(5) { color: var(--green); font-weight: 700; }
-tr.great td:nth-child(5) { color: var(--primary); font-weight: 600; }
+/* IV row coloring */
+tr.row-hundo { background: rgba(30, 142, 62, .10); }
+tr.row-hundo .iv-pct { color: var(--green); font-weight: 700; }
+tr.row-great { background: rgba(26, 115, 232, .07); }
+tr.row-great .iv-pct { color: var(--primary); font-weight: 600; }
+tr.row-good .iv-pct { color: var(--amber); }
 
 tr:hover td { background: var(--surface2); }
+
+/* PvP badges (in table cells) */
+.pvp-cell { white-space: nowrap; }
+.pvp-badge {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-right: 2px;
+  letter-spacing: .3px;
+}
+.pvp-gl { background: #e8f5e9; color: #2e7d32; }
+.pvp-ul { background: #e3f2fd; color: #1565c0; }
+[data-theme="dark"] .pvp-gl { background: rgba(46,125,50,.3); color: #81c784; }
+[data-theme="dark"] .pvp-ul { background: rgba(21,101,192,.3); color: #90caf9; }
+
+/* Summary badges */
+.summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.badge-hundo { background: #e8f5e9; color: #2e7d32; }
+.badge-gl    { background: #e8f5e9; color: #1b5e20; }
+.badge-ul    { background: #e3f2fd; color: #0d47a1; }
+[data-theme="dark"] .badge-hundo { background: rgba(46,125,50,.25); color: #a5d6a7; }
+[data-theme="dark"] .badge-gl    { background: rgba(27,94,32,.25);  color: #a5d6a7; }
+[data-theme="dark"] .badge-ul    { background: rgba(13,71,161,.25); color: #90caf9; }
+
+/* Advanced details */
+.advanced {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+}
+.advanced summary {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+.advanced summary::before {
+  content: '▸';
+  transition: transform .2s;
+}
+.advanced[open] summary::before { transform: rotate(90deg); }
+.advanced-field { padding: 4px 14px 14px; }
 
 .no-results, .searching {
   text-align: center;

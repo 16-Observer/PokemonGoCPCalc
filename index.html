@@ -70,10 +70,9 @@
     <div class="field-row">
       <label for="source-select">Catch source</label>
       <select id="source-select">
-        <option value="wild">Wild (min IV 0)</option>
+        <option value="wild" selected>Wild catch (any IV)</option>
         <option value="weather">Weather-boosted wild (min IV 4)</option>
-        <option value="raid" selected>Raid / Egg / Research (min IV 10)</option>
-        <option value="lucky">Lucky trade (min IV 12)</option>
+        <option value="raid">Raid / Egg / Research (min IV 10)</option>
       </select>
     </div>
 
@@ -88,19 +87,22 @@
       </div>
     </div>
 
-    <div class="field-row">
-      <label for="level-select">Level (optional)</label>
-      <select id="level-select">
-        <option value="">Any level</option>
-        <option value="15">15 — Research / Egg</option>
-        <option value="20">20 — Raid / Egg</option>
-        <option value="25">25 — Weather-boosted raid</option>
-        <option value="30">30 — Wild catch max</option>
-        <option value="35">35 — Weather-boosted wild max</option>
-        <option value="50">50 — Max powered up</option>
-        <option value="51">51 — Best Buddy</option>
-      </select>
-    </div>
+    <details class="advanced">
+      <summary>Advanced filters</summary>
+      <div class="field-row advanced-field">
+        <label for="level-select">Pin to level</label>
+        <select id="level-select">
+          <option value="">Any level</option>
+          <option value="15">15 — Research / Egg</option>
+          <option value="20">20 — Raid / Egg</option>
+          <option value="25">25 — Weather-boosted raid</option>
+          <option value="30">30 — Wild catch max</option>
+          <option value="35">35 — Weather-boosted wild max</option>
+          <option value="50">50 — Max powered up</option>
+          <option value="51">51 — Best Buddy</option>
+        </select>
+      </div>
+    </details>
 
     <button id="search-btn" class="primary-btn">Search</button>
 
