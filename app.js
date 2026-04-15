@@ -232,9 +232,12 @@ function runReverse() {
       appraisal: appraisalValue,
     });
 
-    // Compute GL/UL rankers (iterate all 4096 IV combos each — fast)
-    const rankGL = leagueRanker(atk, def, sta, 1500);
-    const rankUL = leagueRanker(atk, def, sta, 2500);
+    // Only show league badges if this species is actually CP-capped by the league
+    // (i.e. max CP at lv40 exceeds the cap). If it doesn't, it's almost certainly
+    // a pre-evolution — you'd evolve it before PvP, making the badges meaningless.
+    const maxCP40 = calcCP(atk, def, sta, 15, 15, 15, 40);
+    const rankGL = maxCP40 > 1500 ? leagueRanker(atk, def, sta, 1500) : null;
+    const rankUL = maxCP40 > 2500 ? leagueRanker(atk, def, sta, 2500) : null;
 
     renderReverseResults(results, targetCP, rankGL, rankUL);
     updateURL();
@@ -257,8 +260,8 @@ function renderReverseResults(results, targetCP, rankGL, rankUL) {
   // Summary stats
   const hasHundo = results.some(r => r.a === 15 && r.d === 15 && r.s === 15);
   const GL_THRESHOLD = 98, UL_THRESHOLD = 98;
-  const glCount  = results.filter(r => rankGL(r.a, r.d, r.s) >= GL_THRESHOLD).length;
-  const ulCount  = results.filter(r => rankUL(r.a, r.d, r.s) >= UL_THRESHOLD).length;
+  const glCount = rankGL ? results.filter(r => rankGL(r.a, r.d, r.s) >= GL_THRESHOLD).length : 0;
+  const ulCount = rankUL ? results.filter(r => rankUL(r.a, r.d, r.s) >= UL_THRESHOLD).length : 0;
 
   const badges = [];
   if (hasHundo) badges.push('<span class="badge badge-hundo">✦ Hundo possible</span>');
@@ -269,8 +272,8 @@ function renderReverseResults(results, targetCP, rankGL, rankUL) {
   const more = results.length - displayed.length;
 
   const rows = displayed.map(({ level, a, d, s, pct }) => {
-    const gl = rankGL(a, d, s);
-    const ul = rankUL(a, d, s);
+    const gl = rankGL ? rankGL(a, d, s) : 0;
+    const ul = rankUL ? rankUL(a, d, s) : 0;
     const pvpBadges = [
       gl >= GL_THRESHOLD ? '<span class="pvp-badge pvp-gl">GL</span>' : '',
       ul >= UL_THRESHOLD ? '<span class="pvp-badge pvp-ul">UL</span>' : '',
