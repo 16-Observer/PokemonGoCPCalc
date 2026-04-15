@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pokémon GO CP ↔ IV Calculator. Enter a CP to find all possible IVs, or enter IVs to calculate CP.">
+  <title>Pokémon GO IV Calculator</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a73e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="IV Calc">
+</head>
+<body>
+
+<header>
+  <h1>IV Calculator</h1>
+  <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+    </svg>
+  </button>
+</header>
+
+<main>
+
+  <!-- Species picker -->
+  <div class="species-row">
+    <div class="species-input-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        id="species-input"
+        placeholder="Search Pokémon…"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      >
+      <button id="species-clear" style="display:none" aria-label="Clear">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+    <div id="species-suggestions" class="suggestions"></div>
+  </div>
+
+  <!-- Recents -->
+  <div id="recents" class="recents"></div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="reverse" role="tab">Find IVs</button>
+    <button class="tab-btn" data-tab="forward" role="tab">Calc CP</button>
+  </div>
+
+  <!-- ── REVERSE PANEL ── -->
+  <div id="panel-reverse" class="tab-panel active">
+
+    <div class="field-row">
+      <label for="cp-input">CP</label>
+      <input type="number" id="cp-input" min="10" max="10000" placeholder="e.g. 2387" inputmode="numeric">
+    </div>
+
+    <div class="field-row">
+      <label for="source-select">Catch source</label>
+      <select id="source-select">
+        <option value="wild">Wild (min IV 0)</option>
+        <option value="weather">Weather-boosted wild (min IV 4)</option>
+        <option value="raid" selected>Raid / Egg / Research (min IV 10)</option>
+        <option value="lucky">Lucky trade (min IV 12)</option>
+      </select>
+    </div>
+
+    <div class="field-row">
+      <label>Appraisal</label>
+      <div class="appraisal-row">
+        <button class="appraisal-btn active" data-val="">Any</button>
+        <button class="appraisal-btn" data-val="0">0★</button>
+        <button class="appraisal-btn" data-val="1">1★</button>
+        <button class="appraisal-btn" data-val="2">2★</button>
+        <button class="appraisal-btn" data-val="3">3★</button>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <label for="level-select">Level (optional)</label>
+      <select id="level-select">
+        <option value="">Any level</option>
+        <option value="15">15 — Research / Egg</option>
+        <option value="20">20 — Raid / Egg</option>
+        <option value="25">25 — Weather-boosted raid</option>
+        <option value="30">30 — Wild catch max</option>
+        <option value="35">35 — Weather-boosted wild max</option>
+        <option value="50">50 — Max powered up</option>
+        <option value="51">51 — Best Buddy</option>
+      </select>
+    </div>
+
+    <button id="search-btn" class="primary-btn">Search</button>
+
+    <div id="results"></div>
+  </div>
+
+  <!-- ── FORWARD PANEL ── -->
+  <div id="panel-forward" class="tab-panel">
+
+    <div class="iv-row">
+      <div class="iv-field">
+        <label for="atk-iv">Atk IV</label>
+        <input type="number" id="atk-iv" min="0" max="15" value="15" inputmode="numeric">
+      </div>
+      <div class="iv-field">
+        <label for="def-iv">Def IV</label>
+        <input type="number" id="def-iv" min="0" max="15" value="15" inputmode="numeric">
+      </div>
+      <div class="iv-field">
+        <label for="sta-iv">Sta IV</label>
+        <input type="number" id="sta-iv" min="0" max="15" value="15" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <label for="level-input">Level</label>
+      <input type="number" id="level-input" min="1" max="51" step="0.5" value="40" inputmode="decimal">
+    </div>
+
+    <div class="level-presets">
+      <button class="level-preset" data-level="15">Research</button>
+      <button class="level-preset" data-level="20">Raid</button>
+      <button class="level-preset" data-level="25">Weather</button>
+      <button class="level-preset" data-level="40">Lv 40</button>
+      <button class="level-preset" data-level="50">Lv 50</button>
+      <button class="level-preset" data-level="51">BB 51</button>
+    </div>
+
+    <div class="purified-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="purified-check">
+        Purified (+2 to each IV, max 15)
+      </label>
+    </div>
+
+    <button id="calc-btn" class="primary-btn">Calculate</button>
+
+    <div id="forward-result"></div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Data from <a href="https://pvpoke.com" target="_blank" rel="noopener">PvPoke</a> · <a href="https://github.com/16-Observer/PokemonGoCPCalc" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
