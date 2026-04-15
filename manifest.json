@@ -2,7 +2,7 @@
   "name": "Pokémon GO IV Calculator",
   "short_name": "IV Calc",
   "description": "CP ↔ IV calculator for Pokémon GO",
-  "start_url": "/",
+  "start_url": "https://catchiv.app/",
   "display": "standalone",
   "background_color": "#1a73e8",
   "theme_color": "#1a73e8",
